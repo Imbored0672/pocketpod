@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#090a0c">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="PocketPod">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="format-detection" content="telephone=no">
+  <link rel="apple-touch-icon" sizes="180x180" href="pocketpod-icon-180.png">
+  <title>PocketPod</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="manifest" href="manifest.json">
+</head>
+<body>
+  <main class="device-wrap">
+    <section class="ipod" aria-label="PocketPod music player">
+      <div class="screen-frame">
+        <div class="screen">
+          <header class="status">
+            <span class="battery"><i></i><i></i><i></i><i></i></span>
+            <span id="clock">12:00</span>
+          </header>
+          <div class="screen-title" id="screen-title">iPod</div>
+          <div class="menu" id="menu" aria-live="polite"></div>
+          <div class="now-playing hidden" id="now-playing" aria-label="Now playing">
+            <div class="album-art" id="album-art"><span>♪</span></div>
+            <div class="track-name" id="track-name">Nothing Playing</div>
+            <div class="track-artist" id="track-artist">Add music to get started</div>
+            <div class="progress" id="progress" role="slider" aria-label="Song position" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" tabindex="0"><span id="progress-fill"></span></div>
+            <div class="time-row"><span id="elapsed">0:00</span><span id="duration">0:00</span></div>
+            <div class="now-controls"><button id="np-shuffle" type="button">Shuffle: Off</button><button id="np-repeat" type="button">Repeat: Off</button><button id="np-queue" type="button">Play Queue</button></div>
+          </div>
+          <footer class="screen-footer"><span id="footer-hint">Select to open</span><span>♫</span></footer>
+        </div>
+      </div>
+      <div class="wheel" id="wheel" aria-label="Click wheel controls">
+        <div class="wheel-label menu-key" data-action="menu">MENU</div>
+        <button class="wheel-hit previous" data-action="previous" aria-label="Previous track"></button>
+        <button class="wheel-hit next" data-action="next" aria-label="Next track"></button>
+        <button class="wheel-hit play" data-action="play" aria-label="Play or pause">▶Ⅱ</button>
+        <button class="wheel-center" id="select-button" type="button" aria-label="Select"> </button>
+      </div>
+      <div class="model-name">PocketPod</div>
+    </section>
+    <p class="tip">Swipe or rotate the wheel to navigate · Tap the center to select</p>
+  </main>
+  <input id="file-picker" type="file" accept="audio/*,.mp3,.m4a,.aac,.wav,.flac,.ogg" multiple hidden>
+  <input id="folder-picker" type="file" accept="audio/*,.mp3,.m4a,.aac,.wav,.flac,.ogg" webkitdirectory directory multiple hidden>
+  <input id="artwork-picker" type="file" accept="image/*" hidden>
+  <audio id="audio-player" preload="metadata"></audio>
+  <script src="app.js"></script>
+  <script>if ("serviceWorker" in navigator && location.protocol !== "file:") navigator.serviceWorker.register("./service-worker.js", { updateViaCache: "none" }).then(reg => reg.update()).catch(err => console.warn("Service worker update failed:", err));</script>
+</body>
+</html>
