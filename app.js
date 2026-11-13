@@ -34,6 +34,7 @@ let highlight = localStorage.getItem("pp-highlight") || "Blue";
 let wheelColor = localStorage.getItem("pp-wheel") || "Silver";
 let themePack = localStorage.getItem("pp-theme-pack") || "Classic";
 let librarySort = localStorage.getItem("pp-library-sort") || "title";
+let navigationMode = localStorage.getItem("pp-navigation-mode") || "both";
 let artworkTargetId = null;
 const artworkPicker = document.getElementById("artwork-picker");
 
@@ -46,12 +47,12 @@ const pages = {
   artists: { title: "Artists", items: [] }, albums: { title: "Albums", items: [] }, songs: { title: "Songs", items: [] }, genres: { title: "Genres", items: [] }, coverFlow: { title: "Cover Flow", items: [] },
   playlists: { title: "Playlists", items: [["+ Create Playlist","createPlaylist"],["No Playlists Yet","empty"]] },
   import: { title: "Import Music", items: [["Choose Music Files","pickFiles"],["Import a Music Folder","pickFolder"],["Import copies files into PocketPod","empty"],["Supported: MP3, M4A, AAC, WAV, FLAC","empty"]] },
-  settings: { title: "Settings", items: [["Theme Studio","themeStudio"],["Appearance","appearance"],["Playback","playback"],["About PocketPod","about"]] },
+  settings: { title: "Settings", items: [["Theme Studio","themeStudio"],["Appearance","appearance"],["Navigation: Touch + Wheel","navigationMode"],["Playback","playback"],["About PocketPod","about"]] },
   themeStudio: { title: "Theme Studio", items: [] },
   themePacks: { title: "Theme Packs", items: [] },
   appearance: { title: "Appearance", items: [] },
   playback: { title: "Playback", items: [["Repeat: Off","repeat"],["Shuffle: Off","shuffleSetting"],["Play Queue","queue"]] },
-  about: { title: "About PocketPod", items: [["PocketPod V0.8","empty"],["Ad-free. Your music. Your device.","empty"],["Songs stored on this device","empty"],["Album lookup powered by MusicBrainz","empty"]] }
+  about: { title: "About PocketPod", items: [["PocketPod V0.9.1","empty"],["Ad-free. Your music. Your device.","empty"],["Songs stored on this device","empty"],["Album lookup powered by MusicBrainz","empty"]] }
 };
 
 function openDatabase() {
@@ -256,6 +257,7 @@ function rebuildQueuePage(){
 }
 function currentPage(){ return pages[stack[stack.length-1]]; }
 function rebuildThemePages() {
+  pages.settings.items = [["Theme Studio","themeStudio"],["Appearance","appearance"],[`Navigation: ${navigationMode === "wheel" ? "Wheel Only" : "Touch + Wheel"}`,"navigationMode"],["Playback","playback"],["About PocketPod","about"]];
   pages.themeStudio.items = [[`Theme Pack: ${themePack}`,"themePacks"],["Customize Device & Colors","appearance"],["Preview Current Theme","themePreview"]];
   pages.themePacks.items = [
     [`${themePack === "Classic" ? "✓ " : ""}Classic — Original iPod`,"setTheme:Classic"],
@@ -274,6 +276,7 @@ function applyAppearance() {
   root.dataset.theme = themePack.toLowerCase();
   root.dataset.finish = finish.toLowerCase();
   root.dataset.wheel = wheelColor.toLowerCase();
+  root.dataset.navigation = navigationMode;
   ipod.style.filter = "";
   ipod.style.setProperty("--body-finish", finish === "Silver" ? "linear-gradient(145deg,#f0f1f2,#aeb3bb 60%,#e4e6e9)" : finish === "Red" ? "linear-gradient(145deg,#b8323b,#650e18 60%,#9f202a)" : finish === "Blue" ? "linear-gradient(145deg,#334b70,#101b30 60%,#263c5c)" : "linear-gradient(145deg,#292c31,#101114 60%,#24272c)");
   wheel.style.background = wheelColor === "Black" ? "radial-gradient(circle at 35% 25%,#666,#202226 65%,#08090a)" : wheelColor === "Red" ? "radial-gradient(circle at 35% 25%,#f3a0a4,#a92b35 65%,#68151d)" : wheelColor === "Blue" ? "radial-gradient(circle at 35% 25%,#a9c5ed,#466b9f 65%,#1b2e4b)" : "";
@@ -296,7 +299,7 @@ function render(){
       const tracks=library.filter(t=>t.album===albumName);
       const artTrack=tracks.find(t=>t.artBlob);
       if(artTrack){const img=document.createElement("img");const url=URL.createObjectURL(artTrack.artBlob);coverFlowUrls.push(url);img.src=url;img.alt=albumName;art.appendChild(img);}else{const glyph=document.createElement("span");glyph.textContent="♫";art.appendChild(glyph);}
-      const caption=document.createElement("span");caption.className="coverflow-caption";caption.textContent=label;card.append(art,caption);card.addEventListener("click",()=>{selected=i;render();activate();});stage.appendChild(card);
+      const caption=document.createElement("span");caption.className="coverflow-caption";caption.textContent=label;card.append(art,caption);card.addEventListener("click",()=>{if(navigationMode === "wheel")return;selected=i;render();activate();});stage.appendChild(card);
     });
     if(item){const hint=document.createElement("div");hint.className="coverflow-hint";hint.textContent=`${selected+1} / ${page.items.length} · Select album`;stage.appendChild(hint);}
     menuEl.appendChild(stage);
@@ -305,7 +308,7 @@ function render(){
       const groups = [...new Map(library.filter(t => t.album && t.album !== "Unknown Album").map(t => [t.album, t])).entries()];
       if (groups.length) {
         const flow=document.createElement("div"); flow.className="cover-flow"; flow.setAttribute("aria-label","Album Cover Flow");
-        groups.forEach(([album,track])=>{ const card=document.createElement("button"); card.type="button"; card.className="cover-card"; const art=document.createElement("span"); art.className="cover-card-art"; if(track.artBlob){const img=document.createElement("img");const url=URL.createObjectURL(track.artBlob);coverFlowUrls.push(url);img.src=url;img.alt=album;art.appendChild(img);}else{art.textContent="♪";} const name=document.createElement("strong");name.textContent=album;const artist=document.createElement("small");artist.textContent=track.artist||"Unknown Artist";card.append(art,name,artist);card.addEventListener("click",()=>{const matches=library.filter(t=>t.album===album);pages.collection={title:album,items:matches.map(t=>[t.title,`trackDetail:${encodeURIComponent(t.id)}`])};stack.push("collection");selected=0;render();});flow.appendChild(card); }); menuEl.appendChild(flow);
+        groups.forEach(([album,track])=>{ const card=document.createElement("button"); card.type="button"; card.className="cover-card"; const art=document.createElement("span"); art.className="cover-card-art"; if(track.artBlob){const img=document.createElement("img");const url=URL.createObjectURL(track.artBlob);coverFlowUrls.push(url);img.src=url;img.alt=album;art.appendChild(img);}else{art.textContent="♪";} const name=document.createElement("strong");name.textContent=album;const artist=document.createElement("small");artist.textContent=track.artist||"Unknown Artist";card.append(art,name,artist);card.addEventListener("click",()=>{if(navigationMode === "wheel")return;const matches=library.filter(t=>t.album===album);pages.collection={title:album,items:matches.map(t=>[t.title,`trackDetail:${encodeURIComponent(t.id)}`])};stack.push("collection");selected=0;render();});flow.appendChild(card); }); menuEl.appendChild(flow);
       }
     }
     page.items.forEach(([label, action], i) => {
@@ -314,7 +317,7 @@ function render(){
     const name = document.createElement("span"); name.textContent = label;
     const chevron = document.createElement("span"); chevron.className = "chevron"; chevron.textContent = action === "empty" ? "" : "›";
     row.append(name, chevron);
-    row.addEventListener("click", () => { selected = i; render(); activate(); });
+    row.addEventListener("click", () => { if(navigationMode === "wheel") return; selected = i; render(); activate(); });
     menuEl.appendChild(row);
     });
   }
@@ -326,6 +329,13 @@ function activate(){
   const item = currentPage().items[selected]; if(!item) return;
   const action = item[1];
   if(action === "now"){ showNowPlaying(); return; }
+  if(action === "navigationMode"){
+    navigationMode = navigationMode === "wheel" ? "both" : "wheel";
+    localStorage.setItem("pp-navigation-mode", navigationMode);
+    rebuildThemePages(); applyAppearance(); render();
+    footerHint.textContent = navigationMode === "wheel" ? "Wheel Only navigation enabled" : "Touch + Wheel navigation enabled";
+    return;
+  }
   if(action.startsWith("setTheme:")){
     themePack = action.slice(9); localStorage.setItem("pp-theme-pack",themePack); rebuildThemePages(); render(); footerHint.textContent = `${themePack} theme applied`; return;
   }
@@ -583,11 +593,25 @@ document.addEventListener("keydown",e=>{
   if(e.key==="Enter"){e.preventDefault();activate();} if(e.key==="Escape"||e.key==="Backspace"){e.preventDefault();back();}
   if(e.code==="Space"&&!/INPUT|TEXTAREA/.test(document.activeElement.tagName)){e.preventDefault();togglePlayback();}
 });
-let lastAngle=null,accumulated=0;
+let lastAngle=null,accumulated=0,wheelDidDrag=false,suppressWheelClick=false;
 function angleFromEvent(e){const r=wheel.getBoundingClientRect();return Math.atan2(e.clientY-(r.top+r.height/2),e.clientX-(r.left+r.width/2));}
-wheel.addEventListener("pointerdown",e=>{if(e.target.closest("button,.wheel-center,.menu-key"))return;lastAngle=angleFromEvent(e);accumulated=0;wheel.setPointerCapture(e.pointerId);});
-wheel.addEventListener("pointermove",e=>{if(lastAngle===null)return;const a=angleFromEvent(e);let diff=a-lastAngle;if(diff>Math.PI)diff-=Math.PI*2;if(diff< -Math.PI)diff+=Math.PI*2;accumulated+=diff;lastAngle=a;if(Math.abs(accumulated)>.32){move(accumulated>0?1:-1);accumulated=0;}});
-function endWheel(){lastAngle=null;accumulated=0;} wheel.addEventListener("pointerup",endWheel);wheel.addEventListener("pointercancel",endWheel);
+wheel.addEventListener("pointerdown",e=>{
+  if(e.target.closest(".wheel-center"))return;
+  lastAngle=angleFromEvent(e);accumulated=0;wheelDidDrag=false;
+});
+document.addEventListener("pointermove",e=>{
+  if(lastAngle===null)return;
+  const a=angleFromEvent(e);let diff=a-lastAngle;
+  if(diff>Math.PI)diff-=Math.PI*2;if(diff< -Math.PI)diff+=Math.PI*2;
+  accumulated+=diff;lastAngle=a;
+  if(Math.abs(accumulated)>.24){move(accumulated>0?1:-1);accumulated=0;wheelDidDrag=true;}
+});
+function endWheel(){
+  if(wheelDidDrag){suppressWheelClick=true;setTimeout(()=>{suppressWheelClick=false;},450);}
+  lastAngle=null;accumulated=0;wheelDidDrag=false;
+}
+document.addEventListener("pointerup",endWheel);document.addEventListener("pointercancel",endWheel);
+wheel.addEventListener("click",e=>{if(suppressWheelClick){e.preventDefault();e.stopImmediatePropagation();suppressWheelClick=false;}},true);
 filePicker.addEventListener("change",e=>{importFiles(e.target.files);e.target.value="";});
 folderPicker.addEventListener("change",e=>{importFiles(e.target.files);e.target.value="";});
 artworkPicker.addEventListener("change",async e=>{

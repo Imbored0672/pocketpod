@@ -1,4 +1,4 @@
-const CACHE = "pocketpod-shell-v0.9-mobile-1";
+const CACHE = "pocketpod-shell-v0.9.1-mobile-navigation-1";
 const FILES = ["./", "./index.html", "./styles.css", "./app.js", "./manifest.json", "./pocketpod-icon.svg", "./pocketpod-icon-180.png", "./pocketpod-icon-512.png"];
 self.addEventListener("install", event => event.waitUntil((async () => {
   const cache = await caches.open(CACHE);

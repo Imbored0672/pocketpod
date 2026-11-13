@@ -166,3 +166,56 @@ button, [role="button"], .menu-row { -webkit-tap-highlight-color: transparent; }
 @media (display-mode: standalone) {
   .device-wrap { min-height: 100dvh; }
 }
+
+
+/* V0.9.1 — true viewport-fit sizing, safe areas and navigation modes */
+@media (max-width: 600px) {
+  html, body { width:100%; height:100%; min-height:0; }
+  body { height:100vh; height:100dvh; overflow:hidden; }
+  .device-wrap {
+    width:100%; height:100vh; height:100dvh; min-height:0;
+    padding: max(env(safe-area-inset-top), 6px) 0 max(env(safe-area-inset-bottom), 6px);
+    justify-content:stretch; align-items:stretch; gap:0; overflow:hidden;
+  }
+  .ipod {
+    width:min(100%, 520px); max-width:520px; height:100%; min-height:0;
+    flex:1 1 auto; margin:0 auto; padding:clamp(6px, 1.35dvh, 14px) clamp(12px, 4vw, 22px) clamp(6px, 1dvh, 10px);
+    border-radius:0; border:0; box-shadow:none;
+    display:flex; flex-direction:column; justify-content:space-between; gap:0;
+  }
+  .screen-frame { width:100%; min-height:0; flex:1 1 auto; display:flex; padding:clamp(5px, 1.4vw, 9px); }
+  .screen { width:100%; height:auto; min-height:0; max-height:none; flex:1 1 auto; }
+  .screen-title { font-size:clamp(16px, 4.5vw, 21px); line-height:1.2; padding:clamp(6px, 1.1dvh, 10px) 11px; }
+  .menu { min-height:0; }
+  .menu-row { min-height:clamp(36px, 5.1dvh, 46px); padding:clamp(6px, .9dvh, 10px) 12px; font-size:clamp(14px, 3.9vw, 16px); }
+  .wheel {
+    width:min(66vw, 30dvh, 290px); height:min(66vw, 30dvh, 290px);
+    margin:clamp(7px, 1.35dvh, 15px) auto 0; flex:0 0 auto;
+  }
+  .wheel-center { width:38%; height:38%; }
+  .wheel-label { font-size:clamp(9px, 2.7vw, 11px); }
+  .menu-key { top:7%; }
+  .previous, .next { width:23%; height:32%; }
+  .play { bottom:6%; min-height:30px; }
+  .model-name { margin-top:clamp(4px, .7dvh, 8px); flex:0 0 auto; }
+  .tip { display:none; }
+  .now-playing { min-height:0; overflow:auto; padding:clamp(6px, 1.5dvh, 14px) 12px; }
+  .album-art { width:min(34vw, 18dvh, 150px); height:min(34vw, 18dvh, 150px); margin-bottom:7px; }
+  .track-name { font-size:clamp(13px, 3.8vw, 17px); }
+  .track-artist { font-size:11px; }
+  .now-controls button { min-height:34px; font-size:clamp(8px, 2.4vw, 10px); padding:4px; }
+  .progress { min-height:7px; }
+}
+@media (max-width: 600px) and (orientation: landscape) and (max-height: 520px) {
+  .ipod { flex-direction:row; align-items:center; gap:clamp(8px, 2vw, 18px); padding:6px clamp(10px, 2vw, 18px); }
+  .screen-frame { height:100%; width:auto; flex:1 1 auto; }
+  .screen { height:100%; }
+  .wheel { width:min(34vw, 62dvh, 240px); height:min(34vw, 62dvh, 240px); margin:0; }
+  .model-name { display:none; }
+}
+:root[data-navigation="wheel"] .menu { touch-action:none; }
+:root[data-navigation="wheel"] .menu-row,
+:root[data-navigation="wheel"] .coverflow-card,
+:root[data-navigation="wheel"] .cover-card,
+:root[data-navigation="wheel"] #np-queue { pointer-events:none; }
+:root[data-navigation="wheel"] .cover-flow { touch-action:none; }
